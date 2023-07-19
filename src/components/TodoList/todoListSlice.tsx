@@ -1,22 +1,23 @@
+import { v4 as uuidv4 } from "uuid"
 import { createSlice } from "@reduxjs/toolkit"
 
 import { TodoType } from "./Todo"
 
 const initState: TodoType[] = [
     {
-        id: "todo0001",
-        title: "rap việt mùa 3 tập 8",
-        completed: false
-    },
-    {
-        id: "todo0002",
-        title: "học redux qua todo project",
-        completed: false
-    },
-    {
-        id: "todo0003",
-        title: "rap việt mùa 3 tập 7",
+        id: uuidv4(),
+        title: "Learn React, Redux",
         completed: true
+    },
+    {
+        id: uuidv4(),
+        title: "Learn TypeScript",
+        completed: true
+    },
+    {
+        id: uuidv4(),
+        title: "Learn Next.js",
+        completed: false
     }
 ]
 
