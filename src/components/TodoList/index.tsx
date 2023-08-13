@@ -9,7 +9,7 @@ import recycleBinSlice from "../RecycleBin/recycleBinSlice"
 import { TodoType } from "./Todo"
 import Todo from "./Todo"
 
-function getImageURL(index: number) {
+function getImageURL(index: number): string {
   let theme_id: number
 
   if (index % 3 === 0) {

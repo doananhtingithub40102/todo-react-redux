@@ -8,7 +8,7 @@ import recycleBinSlice from "./recycleBinSlice"
 import { TodoType } from "../TodoList/Todo"
 import RecycleBinLineTodo from "./RecycleBinLineTodo"
 
-function getImageURL(index: number) {
+function getImageURL(index: number): string {
   let theme_id: number
 
   if (index % 3 === 0) {
