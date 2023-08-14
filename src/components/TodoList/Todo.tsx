@@ -5,7 +5,8 @@ import todoListSlice from "./todoListSlice"
 import recycleBinSlice from "../RecycleBin/recycleBinSlice"
 
 export type TodoType = {
-    id: string,
+    userId: number,
+    id: number,
     title: string,
     completed: boolean
 }

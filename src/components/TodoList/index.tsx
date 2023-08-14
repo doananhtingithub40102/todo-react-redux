@@ -1,13 +1,14 @@
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
-import { v4 as uuidv4 } from "uuid"
 
 import todosRemainingSelector from "../../redux/selectors"
-import todoListSlice from "./todoListSlice"
+import { todosStatusSelector, todosErrorSelector } from "../../redux/selectors"
+import { fetchTodos, addNewTodos } from "./todoListSlice"
 import recycleBinSlice from "../RecycleBin/recycleBinSlice"
 
 import { TodoType } from "./Todo"
 import Todo from "./Todo"
+import { AnyAction } from "@reduxjs/toolkit"
 
 function getImageURL(index: number): string {
   let theme_id: number
@@ -29,6 +30,31 @@ const TodoList = () => {
   const dispatch = useDispatch()
 
   const todoList = useSelector(todosRemainingSelector)
+  const todosStatus = useSelector(todosStatusSelector)
+  const todosError = useSelector(todosErrorSelector)
+
+  useEffect(() => {
+    if (todosStatus === "idle") {
+      dispatch(fetchTodos() as unknown as AnyAction)
+    }
+  }, [todosStatus])
+
+  let content
+  if (todosStatus === "loading") {
+    content = <p>Loading...</p>
+  } else if (todosStatus === "succeeded") {
+    content = todoList.map((todo: TodoType, index: number) => {
+      return (
+        <Todo
+          key={todo.id}
+          src={getImageURL(index)}
+          todo={todo}
+        />
+      )
+    })
+  } else if (todosStatus === "failed") {
+    content = <p>{todosError}</p>
+  }
 
   const handleAddTodoSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
@@ -37,11 +63,11 @@ const TodoList = () => {
       return
     }
 
-    dispatch(todoListSlice.actions.addTodo({
-      id: uuidv4(),
+    dispatch(addNewTodos({
+      userId: 10,
       title: todoTitle,
       completed: false
-    }))
+    }) as unknown as AnyAction)
 
     setTodoTitle("")
   }
@@ -98,15 +124,7 @@ const TodoList = () => {
         </div>
 
         <div className="todoList">
-          {todoList.map((todo: TodoType, index: number) => {
-            return (
-              <Todo
-                key={todo.id}
-                src={getImageURL(index)}
-                todo={todo}
-              />
-            )
-          })}
+          {content}
         </div>
       </div>
     </main>

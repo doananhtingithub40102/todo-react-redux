@@ -19,7 +19,7 @@ const recycleBinSlice = createSlice({
         clearAllTodo: (state, action: ActionType<TodoType[]>) => {
             state.push(...action.payload)
         },
-        restoreTodo: (state, action: ActionType<string>) => {
+        restoreTodo: (state, action: ActionType<number>) => {
             const indexOfRestoredTodo: number = state.findIndex((todo) => todo.id === action.payload)
 
             state.splice(indexOfRestoredTodo, 1)

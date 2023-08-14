@@ -32,7 +32,7 @@ const RecycleBin = () => {
   const handleRecycleBinEmpty = () => {
     setEmpty(true)
 
-    const idList: string[] = recycleBin.map((todo) => todo.id)
+    const idList: number[] = recycleBin.map((todo) => todo.id)
 
     dispatch(todoListSlice.actions.emptyRecycleBin(idList))
     dispatch(recycleBinSlice.actions.emptyRecycleBin())
