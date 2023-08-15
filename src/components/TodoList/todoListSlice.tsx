@@ -84,7 +84,7 @@ const todoListSlice = createSlice({
                 state.error = action.error.message as string
             })
             .addCase(addNewTodos.fulfilled, (state, action) => {
-                action.payload.id = state.todos[state.todos.length - 1].id + 1
+                action.payload.id = state.todos.length ? state.todos[state.todos.length - 1].id + 1 : action.payload.id
                 state.todos.push(action.payload)
             })
     }
