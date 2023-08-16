@@ -1,9 +1,10 @@
 import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
+import { AnyAction } from "@reduxjs/toolkit"
 
 import { recycleBinSelector } from "../../redux/selectors"
-import todoListSlice from "../TodoList/todoListSlice"
-import recycleBinSlice from "./recycleBinSlice"
+import { deleteTodo } from "../TodoList/todoListSlice"
+import { clearRecycleBin } from "./recycleBinSlice"
 
 import { TodoType } from "../TodoList/Todo"
 import RecycleBinLineTodo from "./RecycleBinLineTodo"
@@ -29,19 +30,19 @@ const RecycleBin = () => {
 
   const dispatch = useDispatch()
 
-  const handleRecycleBinEmpty = () => {
+  const handleRecycleBinClear = () => {
     setEmpty(true)
 
-    const idList: number[] = recycleBin.map((todo) => todo.id)
+    const idList: string[] = recycleBin.map((todo) => todo.id)
 
-    dispatch(todoListSlice.actions.emptyRecycleBin(idList))
-    dispatch(recycleBinSlice.actions.emptyRecycleBin())
+    dispatch(deleteTodo(idList) as unknown as AnyAction)
+    dispatch(clearRecycleBin(idList) as unknown as AnyAction)
   }
 
   return (
     <main className="main main--recycleBin">
       {empty ?
-        <h2>RecycleBin is empty</h2> :
+        <h2>RecycleBin is clean</h2> :
 
         <>
           <h2 className="offscreen">RecyleBin</h2>
@@ -61,9 +62,9 @@ const RecycleBin = () => {
             <button
               className="recycleBin__submit"
               disabled={!recycleBin.length}
-              onClick={handleRecycleBinEmpty}
+              onClick={handleRecycleBinClear}
             >
-              Empty RecycleBin
+              Clear RecycleBin
             </button>
           </div>
         </>

@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react"
 import { useSelector, useDispatch } from "react-redux"
+import { AnyAction } from "@reduxjs/toolkit"
 
 import todosRemainingSelector from "../../redux/selectors"
 import { todosStatusSelector, todosErrorSelector } from "../../redux/selectors"
-import { fetchTodos, addNewTodos } from "./todoListSlice"
-import recycleBinSlice from "../RecycleBin/recycleBinSlice"
+import { fetchTodos, addNewTodo } from "./todoListSlice"
+import { removeAllTodo } from "../RecycleBin/recycleBinSlice"
 
 import { TodoType } from "./Todo"
 import Todo from "./Todo"
-import { AnyAction } from "@reduxjs/toolkit"
 
 function getImageURL(index: number): string {
   let theme_id: number
@@ -37,7 +37,7 @@ const TodoList = () => {
     if (todosStatus === "idle") {
       dispatch(fetchTodos() as unknown as AnyAction)
     }
-  }, [todosStatus])
+  }, [])
 
   let content
   if (todosStatus === "loading") {
@@ -63,7 +63,8 @@ const TodoList = () => {
       return
     }
 
-    dispatch(addNewTodos({
+    dispatch(addNewTodo({
+      id: todoList.length ? (parseInt(todoList[todoList.length - 1].id) + 1).toString() : "1",
       userId: 10,
       title: todoTitle,
       completed: false
@@ -76,7 +77,7 @@ const TodoList = () => {
     setTodoTitle(e.target.value)
   }
 
-  const handleAllTodosClear = () => dispatch(recycleBinSlice.actions.clearAllTodo(todoList))
+  const handleAllTodosRemove = () => dispatch(removeAllTodo(todoList) as unknown as AnyAction)
 
   return (
     <main className="main main--todoList">
@@ -113,11 +114,11 @@ const TodoList = () => {
             <h2 id="listName">List</h2>
             <button
               id="clearTodosButton"
-              title="Remove all todos from the list"
-              onClick={handleAllTodosClear}
+              title="Remove all todos to RecycleBin"
+              onClick={handleAllTodosRemove}
             >
 
-              Clear All
+              Remove All
             </button>
           </header>
           <hr />

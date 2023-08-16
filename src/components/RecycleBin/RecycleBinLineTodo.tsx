@@ -1,6 +1,7 @@
 import { useDispatch } from "react-redux"
+import { AnyAction } from "@reduxjs/toolkit"
 
-import recycleBinSlice from "./recycleBinSlice"
+import { restoreTodo } from "./recycleBinSlice"
 
 import { TodoType } from "../TodoList/Todo"
 
@@ -12,7 +13,7 @@ type PropsType = {
 const RecycleBinLineTodo = ({ src, todo }: PropsType) => {
   const dispatch = useDispatch()
 
-  const handleTodoRestore = () => dispatch(recycleBinSlice.actions.restoreTodo(todo.id))
+  const handleTodoRestore = () => dispatch(restoreTodo(todo.id) as unknown as AnyAction)
 
   return (
     <li className="recycleBin__item">

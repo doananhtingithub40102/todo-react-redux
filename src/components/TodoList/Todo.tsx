@@ -1,12 +1,13 @@
 import { useState } from "react"
 import { useDispatch } from "react-redux"
+import { AnyAction } from "@reduxjs/toolkit"
 
-import todoListSlice from "./todoListSlice"
-import recycleBinSlice from "../RecycleBin/recycleBinSlice"
+import { toggleCompletedTodo } from "./todoListSlice"
+import { removeTodo } from "../RecycleBin/recycleBinSlice"
 
 export type TodoType = {
     userId: number,
-    id: number,
+    id: string,
     title: string,
     completed: boolean
 }
@@ -23,10 +24,10 @@ const Todo = ({ src, todo }: PropsType) => {
 
     const handleCheckboxChange = () => {
         setCompleted(!completed)
-        dispatch(todoListSlice.actions.toggleCompletedTodo(todo.id))
+        dispatch(toggleCompletedTodo(todo.id) as unknown as AnyAction)
     }
 
-    const handleTodoDelete = () => dispatch(recycleBinSlice.actions.deleteTodo(todo))
+    const handleTodoRemove = () => dispatch(removeTodo(todo) as unknown as AnyAction)
 
     return (
         <article className="todo">
@@ -41,10 +42,10 @@ const Todo = ({ src, todo }: PropsType) => {
                 />
             </p>
             <button
-                title="Delete this todo"
-                onClick={handleTodoDelete}
+                title="Remove this todo"
+                onClick={handleTodoRemove}
             >
-                Delete ❌
+                Remove ❌
             </button>
         </article>
     )
