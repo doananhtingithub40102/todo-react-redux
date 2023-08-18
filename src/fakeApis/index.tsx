@@ -50,8 +50,7 @@ export default function configureMirage() {
 
             this.post("/removeTodo", (schema: AppSchema, request) => {
                 const todo = JSON.parse(request.requestBody)
-                schema.db.emptyData()
-                
+
                 return schema.create("recycle", todo)
             })
 
@@ -65,13 +64,31 @@ export default function configureMirage() {
                 return new Response(201, {}, { recycles: todos })
             })
 
-            this.patch("/updateTodo", (schema: AppSchema, request) => {
+            this.patch("/updateCompleted", (schema: AppSchema, request) => {
                 const id = request.requestBody
                 const todo = schema.find("todo", id)
 
                 todo?.update({ completed: !todo.completed })
 
                 return todo
+            })
+
+            this.patch("/updateId", (schema: AppSchema, request) => {
+                const id = request.requestBody
+                const oldTodo = schema.find("todo", id)
+
+                const maxId = schema.all("todo").sort((a, b) => parseInt(b.id) - parseInt(a.id)).models[0].id
+                const newTodo = {
+                    userId: oldTodo?.userId,
+                    id: (parseInt(maxId) + 1).toString(),
+                    title: oldTodo?.title,
+                    completed: oldTodo?.completed
+                }
+
+                oldTodo?.destroy()
+                schema.create("todo", newTodo)
+
+                return new Response(200, {}, { oldId: id, newId: newTodo.id })
             })
 
             this.delete("/restoreTodo", (schema: AppSchema, request) => {

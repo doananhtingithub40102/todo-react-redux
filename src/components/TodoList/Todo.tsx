@@ -2,7 +2,7 @@ import { useState } from "react"
 import { useDispatch } from "react-redux"
 import { AnyAction } from "@reduxjs/toolkit"
 
-import { toggleCompletedTodo } from "./todoListSlice"
+import { toggleCompleted } from "./todoListSlice"
 import { removeTodo } from "../RecycleBin/recycleBinSlice"
 
 export type TodoType = {
@@ -24,7 +24,7 @@ const Todo = ({ src, todo }: PropsType) => {
 
     const handleCheckboxChange = () => {
         setCompleted(!completed)
-        dispatch(toggleCompletedTodo(todo.id) as unknown as AnyAction)
+        dispatch(toggleCompleted(todo.id) as unknown as AnyAction)
     }
 
     const handleTodoRemove = () => dispatch(removeTodo(todo) as unknown as AnyAction)

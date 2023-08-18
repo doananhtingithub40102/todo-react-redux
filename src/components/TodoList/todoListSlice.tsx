@@ -34,7 +34,7 @@ const todoListSlice = createSlice({
             .addCase(addNewTodo.fulfilled, (state, action) => {
                 state.todos.push(action.payload)
             })
-            .addCase(toggleCompletedTodo.fulfilled, (state, action) => {
+            .addCase(toggleCompleted.fulfilled, (state, action) => {
                 const indexOfChangedTodo = state.todos.findIndex(todo => todo.id === action.payload.id)
 
                 state.todos[indexOfChangedTodo].completed = !state.todos[indexOfChangedTodo].completed
@@ -45,6 +45,25 @@ const todoListSlice = createSlice({
 
                     state.todos.splice(indexOfDeleteTodo, 1)
                 })
+            })
+            .addCase(updateId.fulfilled, (state, action) => {
+                const { oldId, newId } = action.payload
+
+                for (let i = 0; i < state.todos.length; i++) {
+                    if (state.todos[i].id === oldId) {
+                        const todo = {
+                            userId: state.todos[i].userId,
+                            id: newId,
+                            title: state.todos[i].title,
+                            completed: state.todos[i].completed
+                        }
+
+                        state.todos.push(todo)
+                        state.todos.splice(i, 1)
+
+                        break
+                    }
+                }
             })
     }
 })
@@ -77,9 +96,9 @@ export const addNewTodo = createAsyncThunk("todos/addNewTodo", async (newTodo: T
     }
 })
 
-export const toggleCompletedTodo = createAsyncThunk("todos/toggleCompletedTodo", async (id: string) => {
+export const toggleCompleted = createAsyncThunk("todos/toggleCompleted", async (id: string) => {
     try {
-        const res = await fetch("api/updateTodo", {
+        const res = await fetch("api/updateCompleted", {
             method: "PATCH",
             body: id
         })
@@ -96,6 +115,20 @@ export const deleteTodo = createAsyncThunk("todos/deleteTodo", async (idList: st
         const res = await fetch("api/deleteTodo", {
             method: "DELETE",
             body: JSON.stringify(idList)
+        })
+        const data = await res.json()
+
+        return data
+    } catch (error) {
+        return (error as Error).message
+    }
+})
+
+export const updateId = createAsyncThunk("todos/updateId", async (id: string) => {
+    try {
+        const res = await fetch("api/updateId", {
+            method: "PATCH",
+            body: id
         })
         const data = await res.json()
 
