@@ -1,28 +1,15 @@
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { useSelector, useDispatch } from "react-redux"
+import { AnyAction } from "@reduxjs/toolkit"
 
 import todosRemainingSelector from "../../redux/selectors"
-import { todosStatusSelector, todosErrorSelector } from "../../redux/selectors"
-import { fetchTodos, addNewTodos } from "./todoListSlice"
+import { todosStatusSelector, todosErrorSelector, usersSelector, selectedUserSelector } from "../../redux/selectors"
+import { addNewTodos, getTodosByUserId } from "./todoListSlice"
 import recycleBinSlice from "../RecycleBin/recycleBinSlice"
+import usersSlice from "../UserSelect/userSelectSlice"
 
 import { TodoType } from "./Todo"
 import Todo from "./Todo"
-import { AnyAction } from "@reduxjs/toolkit"
-
-function getImageURL(index: number): string {
-  let theme_id: number
-
-  if (index % 3 === 0) {
-    theme_id = 1
-  } else if ((index - 1) % 3 === 0) {
-    theme_id = 2
-  } else {
-    theme_id = 3
-  }
-
-  return new URL(`../../images/theme_${theme_id}.jpg`, import.meta.url).href
-}
 
 const TodoList = () => {
   const [todoTitle, setTodoTitle] = useState("")
@@ -32,22 +19,27 @@ const TodoList = () => {
   const todoList = useSelector(todosRemainingSelector)
   const todosStatus = useSelector(todosStatusSelector)
   const todosError = useSelector(todosErrorSelector)
+  const users = useSelector(usersSelector)
+  const selectedUser = useSelector(selectedUserSelector)
 
-  useEffect(() => {
-    if (todosStatus === "idle") {
-      dispatch(fetchTodos() as unknown as AnyAction)
-    }
-  }, [todosStatus])
+  const user = selectedUser === -1 ? "" : selectedUser + 1
+
+  const handleChangeUser = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    dispatch(getTodosByUserId(parseInt(e.target.value)) as unknown as AnyAction)
+    dispatch(usersSlice.actions.selectUser(parseInt(e.target.value)))
+    dispatch(recycleBinSlice.actions.emptyRecycleBin())
+  }
 
   let content
-  if (todosStatus === "loading") {
+  if (todosStatus === "idle" || !user) {
+    content = <p>No data</p>
+  } else if (todosStatus === "loadingTodos") {
     content = <p>Loading...</p>
-  } else if (todosStatus === "succeeded") {
-    content = todoList.map((todo: TodoType, index: number) => {
+  } else if (todosStatus === "succeeded" || todosStatus === "loadingChecked") {
+    content = todoList.map((todo: TodoType) => {
       return (
         <Todo
           key={todo.id}
-          src={getImageURL(index)}
           todo={todo}
         />
       )
@@ -64,7 +56,7 @@ const TodoList = () => {
     }
 
     dispatch(addNewTodos({
-      userId: 10,
+      userId: user as number,
       title: todoTitle,
       completed: false
     }) as unknown as AnyAction)
@@ -79,55 +71,64 @@ const TodoList = () => {
   const handleAllTodosClear = () => dispatch(recycleBinSlice.actions.clearAllTodo(todoList))
 
   return (
-    <main className="main main--todoList">
-      <div className="newItemEntry">
-        <form
-          className="newItemEntry__form"
-          id="itemEntryForm"
-          onSubmit={handleAddTodoSubmit}
-        >
-          <input
-            className="newItemEntry__input"
-            id="newItem"
-            type="text"
-            maxLength={40}
-            autoComplete="off"
-            placeholder="Add todo"
-            value={todoTitle}
-            onChange={handleInputChange}
-          />
-          <button
-            type="submit"
-            id="addItem"
-            className="newItemEntry__button"
-            title="Add new todo to list">
-
-            +
-          </button>
-        </form>
+    <>
+      <div id="overlay" style={{ display: todosStatus === "addingTodo" ? "block" : "none" }}>
+        <div className="spinner"></div>
+        <p>Adding todo...</p>
       </div>
-
-      <div className="listContainer">
-        <div>
-          <header className="listHeader">
-            <h2 id="listName">List</h2>
+      <main className="main main--todoList">
+        <div className="newItemEntry">
+          <form
+            className="newItemEntry__form"
+            style={{ display: user ? "flex" : "none" }}
+            id="itemEntryForm"
+            onSubmit={handleAddTodoSubmit}
+            hidden={!user ? true : true}
+          >
+            <input
+              className="newItemEntry__input"
+              id="newItem"
+              type="text"
+              maxLength={40}
+              autoComplete="off"
+              placeholder="Add todo"
+              value={todoTitle}
+              onChange={handleInputChange}
+              required
+            />
             <button
-              id="clearTodosButton"
-              title="Remove all todos from the list"
-              onClick={handleAllTodosClear}
-            >
-
-              Clear All
+              type="submit"
+              id="addItem"
+              className="newItemEntry__button"
+              title="Add new todo to list">
+              +
             </button>
-          </header>
-          <hr />
+          </form>
+          {/* User Selection */}
+          <div>
+            <h2>User</h2>
+            <select value={user} onChange={handleChangeUser} className="users__select">
+              <option value="">Select user</option>
+              {users.map(user => <option key={user.id} value={user.id}>{user.name}</option>)}
+            </select>
+          </div>
         </div>
-
+        <header className="listHeader">
+          <h2 id="listName">List</h2>
+          <button
+            id="clearTodosButton"
+            title="Remove all todos from the list"
+            onClick={handleAllTodosClear}
+          >
+            Clear All
+          </button>
+        </header>
+        <hr />
         <div className="todoList">
           {content}
         </div>
-      </div>
-    </main>
+      </main>
+    </>
   )
 }
 

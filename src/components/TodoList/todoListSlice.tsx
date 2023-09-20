@@ -12,7 +12,7 @@ export type InitStateType = {
 
 const initState: InitStateType = {
     todos: [],
-    status: "idle", // "idle" | "loading" | "succeeded" | "failed"
+    status: "idle", // "idle" | "loadingTodos" | "succeeded" | "failed"
     error: null
 }
 
@@ -21,11 +21,12 @@ type ActionType<T = TodoType> = {
     payload: T
 }
 
-export const fetchTodos = createAsyncThunk("todos/fetchTodos", async () => {
+export const getTodosByUserId = createAsyncThunk("todos/getTodosByUserId", async (userId: number) => {
+    if (!userId) return []
+
     try {
-        const res = await fetch(TODOS_URL)
+        const res = await fetch(`https://jsonplaceholder.typicode.com/users/${userId}/todos`)
         let data = await res.json()
-        data = (data as TodoType[]).filter((todo) => todo.userId === 10)
 
         return data
     } catch (error) {
@@ -50,18 +51,27 @@ export const addNewTodos = createAsyncThunk("todos/addNewTodos", async (newTodo:
     }
 })
 
+export const toggleCompletedTodo = createAsyncThunk("todos/toggleCompletedTodo", async (arg: { todoId: number, completed: boolean }) => {
+    try {
+        const res = await fetch(`${TODOS_URL}/${arg.todoId}`, {
+            method: "PATCH",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ "completed": !arg.completed })
+        })
+        const data = await res.json()
+
+        return data
+    } catch (error) {
+        return (error as Error).message
+    }
+})
+
 const todoListSlice = createSlice({
     name: "todoList",
     initialState: initState,
     reducers: {
-        addTodo: (state, action: ActionType) => {
-            state.todos.push(action.payload)
-        },
-        toggleCompletedTodo: (state, action: ActionType<number>) => {
-            const indexOfChangedTodo: number = state.todos.findIndex((todo) => todo.id === action.payload)
-
-            state.todos[indexOfChangedTodo].completed = !state.todos[indexOfChangedTodo].completed
-        },
         emptyRecycleBin: (state, action: ActionType<number[]>) => {
             action.payload.forEach((delete_id) => {
                 const indexOfDeleteTodo = state.todos.findIndex((todo) => todo.id === delete_id)
@@ -72,20 +82,33 @@ const todoListSlice = createSlice({
     },
     extraReducers(builder) {
         builder
-            .addCase(fetchTodos.pending, (state) => {
-                state.status = "loading"
+            .addCase(getTodosByUserId.pending, (state) => {
+                state.status = "loadingTodos"
             })
-            .addCase(fetchTodos.fulfilled, (state, action) => {
+            .addCase(getTodosByUserId.fulfilled, (state, action) => {
                 state.status = "succeeded"
-                state.todos = action.payload
+                state.todos = [...action.payload].sort((todoA, todoB) => todoB.id - todoA.id)
             })
-            .addCase(fetchTodos.rejected, (state, action) => {
+            .addCase(getTodosByUserId.rejected, (state, action) => {
                 state.status = "failed"
                 state.error = action.error.message as string
             })
+            .addCase(addNewTodos.pending, (state) => {
+                state.status = "addingTodo"
+            })
             .addCase(addNewTodos.fulfilled, (state, action) => {
-                action.payload.id = state.todos.length ? state.todos[state.todos.length - 1].id + 1 : action.payload.id
-                state.todos.push(action.payload)
+                state.status = "succeeded"
+                action.payload.id = state.todos.length ? state.todos[0].id + 1 : action.payload.id
+                state.todos = [action.payload, ...state.todos]
+            })
+            .addCase(toggleCompletedTodo.pending, (state) => {
+                state.status = "loadingChecked"
+            })
+            .addCase(toggleCompletedTodo.fulfilled, (state, action) => {
+                state.status = "succeeded"
+                const indexOfChangedTodo: number = state.todos.findIndex((todo) => todo.id === action.payload.id)
+
+                state.todos[indexOfChangedTodo].completed = action.payload.completed
             })
     }
 })

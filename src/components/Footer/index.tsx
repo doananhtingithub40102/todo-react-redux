@@ -9,7 +9,8 @@ type PropsType = {
 const Footer = ({ viewTodoList }: PropsType) => {
   const year: number = new Date().getFullYear()
 
-  const todoList_size: number = useSelector(todosRemainingSelector).length
+  const completedTodos = useSelector(todosRemainingSelector).filter(todo => todo.completed).length
+  const totalTodos: number = useSelector(todosRemainingSelector).length
 
   return (
     <footer className="footer">
@@ -17,7 +18,7 @@ const Footer = ({ viewTodoList }: PropsType) => {
         <p>TodoApp &copy; {year}</p> :
 
         <>
-          <p>Total Todos: {todoList_size}</p>
+          <p>Done {completedTodos}/{totalTodos} todos</p>
           <p>TodoApp &copy; {year}</p>
         </>
       }

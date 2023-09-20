@@ -8,20 +8,6 @@ import recycleBinSlice from "./recycleBinSlice"
 import { TodoType } from "../TodoList/Todo"
 import RecycleBinLineTodo from "./RecycleBinLineTodo"
 
-function getImageURL(index: number): string {
-  let theme_id: number
-
-  if (index % 3 === 0) {
-    theme_id = 1
-  } else if ((index - 1) % 3 === 0) {
-    theme_id = 2
-  } else {
-    theme_id = 3
-  }
-
-  return new URL(`../../images/theme_${theme_id}.jpg`, import.meta.url).href
-}
-
 const RecycleBin = () => {
   const [empty, setEmpty] = useState(false)
 
@@ -46,11 +32,10 @@ const RecycleBin = () => {
         <>
           <h2 className="offscreen">RecyleBin</h2>
           <ul className="recycleBin">
-            {recycleBin.map((todo: TodoType, index: number) => {
+            {recycleBin.map((todo: TodoType) => {
               return (
                 <RecycleBinLineTodo
                   key={todo.id}
-                  src={getImageURL(index)}
                   todo={todo}
                 />
               )
